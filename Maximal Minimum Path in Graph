@@ -1,0 +1,96 @@
+
+class Queue:
+    def __init__(self):
+        self.obj=[]
+    def enqueue(self,data):
+        self.obj.insert(0,data)
+    def dequeue(self):
+        return self.obj.pop()
+    def isEmpty(self):
+        if self.obj==[]:
+            return True
+        else:
+            return False
+        
+def adj(n,links):
+    L=[[] for x in range(n)]
+    
+    for i in range(len(links)):
+        L[links[i][0]].append(links[i][1])
+        L[links[i][1]].append(links[i][0])
+    return L
+    
+def BFS(s,t,links,n,c):
+    for i in range(len(links)):
+        if links[i][2]==c:
+            lst=links[i:]
+            break
+    graph=adj(n,lst)
+    
+    vis=[0 for x in range(n)]
+    if s==t:
+        return True
+    Q=Queue()
+    Q.enqueue(s)
+    vis[s]=1
+    while Q.isEmpty()==False:
+        u=Q.dequeue()
+        for x in graph[u]:
+           if x==t:
+               return True
+           if (vis[x]==0):
+               vis[x]=1
+               Q.enqueue(x)
+    return False
+def findCapacity(n,bslinks,s,t):
+    left=0
+    right=len(bslinks) -1
+    
+    while (right-left)>1:
+        mid=(left+right)//2
+        if BFS(s,t,bslinks,n,bslinks[mid][2])==True:
+            left=mid+1
+            if BFS(s,t,bslinks,n,bslinks[left][2])==False:
+                return bslinks[mid][2]
+        else:
+            right=mid-1
+            if BFS(s,t,bslinks,n,bslinks[right][2])==True:
+                return bslinks[right][2]
+    if BFS(s,t,bslinks,n,bslinks[left][2])==True and BFS(s,t,bslinks,n,bslinks[right][2])==False:
+        return bslinks[left][2]
+    if BFS(s,t,bslinks,n,bslinks[left][2])==True and BFS(s,t,bslinks,n,bslinks[right][2])==True:
+        return bslinks[right][2]
+def route(s,t,links,n,c):
+    for i in range(len(links)):
+        if links[i][2]==c:
+            lst=links[i:]
+            break
+    graph=adj(n,lst)
+    parent=[None for x in range(n)]
+    vis=[0 for x in range(n)]
+    r=[]
+    if s==t:
+        return [s]
+    Q=Queue()
+    Q.enqueue(s)
+    vis[s]=1
+    while Q.isEmpty()==False:
+        u=Q.dequeue()
+        for x in graph[u]:
+           if (vis[x]==0):
+               vis[x]=1
+               Q.enqueue(x)
+               parent[x]=u
+    while t!=s:
+        r.append(t)
+        t=parent[t]
+    r.append(s)
+    return r[::-1]
+    
+           
+def findMaxCapacity(n,links,s,t):
+    bslinks=sorted(links,key=lambda x : x[2])
+    c=findCapacity(n,bslinks,s,t)
+    lst=route(s,t,bslinks,n,c)
+    return (c,lst)
+
