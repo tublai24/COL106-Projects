@@ -1,0 +1,220 @@
+lass Node():
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+        self.ytree =None
+def func(arr):
+     
+    if not arr:
+        return None
+    mid = (len(arr)) // 2
+    root = Node(arr[mid])
+    root.left = func(arr[:mid])
+    root.right = func(arr[mid+1:])
+    return root
+def createY(median,Y):
+    Y_left=[]
+    Y_right=[]
+    for i in range(len(Y)):
+        if Y[i][0]<median:
+            Y_left.append(Y[i])
+        else:
+            Y_right.append(Y[i])
+    return [Y_left,Y_right]
+def buildTree(X,Y):
+    mid=len(X)//2
+    root=Node(mid)
+    if mid==0:
+        return 
+    else:
+        root.val=X[mid]
+        xm=X[mid][0]
+        X_left=X[:mid]
+        X_right=X[mid+1:]
+        ykalist=createY(xm,Y)
+        Y_left=ykalist[0]
+        Y_right=ykalist[1]
+        root.left=buildTree(X_left,Y_left)
+        root.right=buildTree(X_right,Y_right)
+        root.ytree= func(Y)
+        return root 
+def split_X(root,x1,x2):
+    split_root=root
+    while split_root!=None:
+        if split_root.val[0]>x2:
+            split_root=split_root.left
+        elif split_root.val[0]<x1:
+            split_root=split_root.right 
+        elif x1<=split_root.val[0]<=x2:
+            break 
+    return split_root 
+def split_Y(root,y1,y2):
+    split_root=root
+    while split_root!=None:
+        if split_root.val[1]>y2:
+            split_root=split_root.left
+        elif split_root.val[1]<y1:
+            split_root=split_root.right 
+        elif y1<=split_root.val[1]<=y2:
+            break 
+    return split_root 
+def isrange1D(point,inter):
+    if point>=inter[0][0] and point<=inter[0][1]:
+        return True
+    else:
+        return False 
+def isrange2D(point,inter):
+    if (inter[0][0]<=point[0]<=inter[0][1] and inter[1][0]<=point[1]<=inter[1][1]):
+        return True
+    else:
+        return False
+def value2D(point,truth):
+    if truth:
+        return point.val[0]
+    else:
+        return point.val[1]
+def binarysearchright(a,right):
+    x=len(a)
+    if (a[0][1]>right):
+        return -100
+    low =0
+    high=x-1
+    while low<=high:
+        mid = low+(high-low)//2 
+        if a[mid][1]>right:
+            high=mid-1
+        else:
+            low=mid+1
+    return(high+1)
+def binarysearchleft(a,left):
+    le=len(a)
+    if (a[len(a)-1][1]<left):
+        return -100
+    low =0
+    high=le-1
+    while low<=high:
+        mid = low+(high-low)//2 
+        if a[mid][1]>=left:
+            high=mid-1
+        else:
+            low=mid+1
+    return(high+1)
+def query(lst,left,right):
+    if len(lst)==0:
+        return []
+    lower=binarysearchleft(lst,left)
+    upper=binarysearchright(lst,right)
+    if lower ==-100 or upper==-100 or lower>upper:
+        return []
+    return lst[lower:upper]
+
+def emerge(L,R):
+    arr=[]
+    i= j = 0
+        # Copy data to temp arrays L[] and R[]
+    while i < len(L) and j < len(R):
+        if L[i][1] <= R[j][1]:
+            arr.append(L[i])
+            i += 1
+        else:
+            arr.append(R[j])
+            j += 1
+        # Checking if any element was left
+    while i < len(L):
+        arr.append(L[i])
+        i += 1
+    while j < len(R):
+        arr.append(R[j])
+        j += 1
+    return arr
+class yTreeNode():
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+class yTrees():
+    def __init__(self,key):
+        self.key=key
+        if key==[]:
+            self.rootnode=None
+        else:
+            self.rootnode=self.key[0]
+class PointDatabase():
+    def __init__(self,pointlist):
+
+        if len(pointlist)!=0:
+            x=sorted(pointlist)
+            self.root=self.build2dtree(x)
+        else:
+            self.root=None
+    def build2dtree(self,lst):
+        if len(lst)<0:
+            raise Exception('length is negative')
+        middle=(len(lst)-1)//2 
+        if middle==-1:
+            return 
+        if len(lst)==1:
+            root=Node(lst[0])
+            root.ytree=yTrees(lst)  
+            return root
+        root=Node(lst[middle])
+        root.left = self.build2dtree(lst[:middle+1])
+        root.right= self.build2dtree(lst[middle+1:])
+        lst1=emerge(root.left.ytree.key,root.right.ytree.key)
+
+        root.ytree=yTrees(lst1)
+        return root
+
+    def findsplitnode(self,root,x1,x2):
+        split_root=root
+        while split_root!=None:
+            if split_root.val[0]>x2:
+                split_root=split_root.left
+            elif split_root.val[0]<x1:
+                split_root=split_root.right 
+            elif x1<=split_root.val[0]<=x2:
+                break 
+        return split_root 
+            
+                
+    def querysearch(self,root,x1,x2,y1,y2):
+        L=[]
+        if root==None:
+            return L
+        ptr=self.findsplitnode(root,x1,x2)
+        if ptr==None:
+            return L
+        if ptr.left==None and ptr.right ==None:
+            if x1<=ptr.val<=x2 and y1<=ptr.val<=y2:
+                L.append(ptr.val)
+                return L
+            else:
+                return L
+        else:
+            l = ptr.left
+            if l!=None:
+                while not (l.left==None and l.right ==None): 
+                    if x1<=l.val[0]:
+                        if l.right!=None:    
+                            L+=query(l.right.ytree.key,y1,y2)
+                        l=l.left
+                    else:
+                        l=l.right
+                if (x1<=l.val[0] and x2>=l.val[0]) and (y1<=l.val[1] and y2>=l.val[1]):
+                    L.append(l.val)
+            l=ptr.right
+            if l!=None:
+                while not (l.left==None and l.right ==None): 
+                    if x2>=l.val[0]:
+                        if l.left!=None:    
+                            L+=query(l.left.ytree.key,y1,y2)
+                        l=l.right
+                    else:
+                        l=l.left
+                if (x1<=l.val[0] and x2>=l.val[0]) and (y1<=l.val[1] and y2>=l.val[1]):
+                    L.append(l.val)
+            return L
+    def searchNearby(self,q,d):
+        if d==0:
+            return []
+        return(self.querysearch(self.root,q[0]-d,q[0]+d,q[1]-d,q[1]+d))
