@@ -1,0 +1,104 @@
+import random
+import math
+
+def randPrime(N):
+    primes=[]
+    for q in range(2,N+1):
+        if (isPrime(q)):
+            primes.append(q)
+    return primes[random.randint(0,len(primes)-1)]
+
+def isPrime(q):
+    if (q>1):
+        for i in range(2,int(math.sqrt(q))+1):
+            if (q%i==0):
+                return False
+            return True
+    else:
+        return False
+def randPatternMatch(eps,p,x):
+    N=findN(eps,len(p))
+    q=randPrime(N)
+    return modPatternMatch(q,p,x)
+
+def findN(eps,m):
+    return int(2*eps*m*(math.log(eps*m)))
+
+def val(x):
+    return ord(x)-ord('a')
+
+def modPatternMatch(q,p,x):
+    m=len(p)
+    n=len(x)
+    P=rollinghashkey(q, p, x)
+    has=P[1]
+    key=P[0]
+    power=fastmod(q,m)
+    L=[]
+    for i in range(n-m):
+        if has==key:
+            L.append(i)
+        has= (26*has - val(x[i])*power + val(x[i+m]))%q
+    if has==key:
+        L.append(n-m)
+    return L
+def rollinghashkey(q,p,x):
+    m=len(p)
+    has=0
+    po=1
+    key=0
+    L=[]
+    for i in range(m-1,-1,-1):
+        key= (key + (((val(p[i]))%q)*po)%q)%q
+        has= (has + (((val(x[i]))%q)*po)%q)%q
+        po=(po*26)%q
+    L.append(key)
+    L.append(has)
+    return L        
+def fastmod(q,m):
+    x=1
+    for i in range(m):
+        x=(x*26)%q
+    return x    
+def randPatternMatchWildcard(eps,p,x):
+    N=findN(eps,len(p))
+    q=randPrime(N)
+    return modPatternMatchWildcard(q,p,x)
+
+def modPatternMatchWildcard(q,p,x):
+    m=len(p)
+    n=len(x)
+    power=fastmod(q,m)
+    for i in range(m):
+        if p[i]=='?':
+            index=i
+            break
+    P=rollinghash2(q, p, x, index)
+    key=P[0]
+    has=P[1]
+    power2=fastmod(q,m-1-index)
+    L=[]
+    for i in range(n-m):
+        if has== (key + val(x[i+index])*power2)%q:
+            L.append(i)
+        has= (26*has - val(x[i])*power + val(x[i+m]))%q
+    if has== (key + val(x[n-m+index])*power2)%q:
+        L.append(n-m)
+    return L
+
+def rollinghash2(q,p,x,index):
+    m=len(p)
+    po=1
+    has=0
+    key=0
+    L=[]
+    for i in range(m-1,-1,-1):
+        if i!=index:
+            key= (key + (((val(p[i]))%q)*po)%q)%q
+        has= (has + (((val(x[i]))%q)*po)%q)%q
+        po=(po*26)%q
+    L.append(key)
+    L.append(has)
+    return L        
+
+#the link for the google drive file for proof of bound is https://drive.google.com/drive/folders/1-2s-XQex_ndmyoiKxLiaOf955rz7X6df?usp=sharing
