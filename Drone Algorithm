@@ -1,0 +1,96 @@
+class Node:
+    def __init__(self,data):
+        self.data = data
+        self.next = None
+      
+class Stack:
+      
+    def __init__(self):
+        self.head = None
+    def isempty(self):
+        if self.head == None:
+            return True
+        else:
+            return False
+    def push(self,val):
+          
+        if self.head == None:
+            self.head=Node(val)              
+        else:
+            new = Node(val)
+            new.next = self.head
+            self.head =new
+    def pop(self):
+          
+        if self.isempty():
+            raise Exception("Popping from empty stack")
+              
+        else:
+            #we replace the head node as the second node in the stack and set its next to Null
+            rem = self.head
+            self.head = self.head.next
+            rem.next = None
+            return rem.data
+      
+    #to check the value of the topmost element in the stack
+    def top(self):
+        if self.isempty():
+            raise Exception("Peeking an empty stack")
+              
+        else:
+            return self.head.data
+def findPositionandDistance(p):
+    n=len(p)
+    x,y,z,d=0,0,0,0
+    i=0
+    num=['1','2','3','4','5','6','7','8','9','0']
+    st=Stack()
+    while i<n:
+        # we are detecting the numbers in the string and kind of concatenating them by appending which uses O(1) instead of O(m+n)
+        if p[i] in num:
+            q=[]
+            while p[i] in num:
+                q.append(p[i])
+                i+=1
+            val=int("".join(q))
+            #for numbers inside bracket , we will multiply them accordingly if there exists numbers outside bracket
+            if st.isempty()==False and st.top()=='(':
+                st.pop()
+                val= val*st.top()
+                st.push('(')
+            st.push(val)
+        elif p[i]=='(':
+            st.push('(')
+            i+=1
+        elif p[i]=='+' or p[i]=='-':
+            #extract number in front of bracket , if bracket isnt there by default increment decrement by 1
+            val=1
+            if st.isempty()==False and st.top()=='(':
+                st.pop()
+                val=st.top()
+                st.push('(')
+            if p[i]=='+' and p[i+1]=='X':
+                x+=val 
+                d+=val
+            elif p[i]=='+' and p[i+1]=='Y':
+                y+=val
+                d+=val
+            elif p[i]=='+' and p[i+1]=='Z':
+                z+=val
+                d+=val
+            elif p[i]=='-' and p[i+1]=='X':
+                x-=val
+                d+=val
+            elif p[i]=='-' and p[i+1]=='Y':
+                y-=val
+                d+=val
+            elif p[i]=='-' and p[i+1]=='Z':
+                z-=val
+                d+=val
+            i+=2
+        #close all brackets and remove the number from stack if end bracket comes
+        elif p[i]==')':
+            st.pop()
+            st.pop()
+            i+=1
+    return [x,y,z,d]
