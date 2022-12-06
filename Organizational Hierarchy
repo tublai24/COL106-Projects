@@ -1,0 +1,306 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include <string.h>
+
+// The following is a employee in the organisation, it has the pointer to two more employees a subordinate_1 and a subordinate_2
+struct Employee {
+    int emp_id; // emp_ids will be unique
+    char* emp_name;
+    int emp_salary;
+    struct Employee* subordinate_1;
+    struct Employee* subordinate_2;
+};
+
+// The following function creates a employee and returns its pointer
+struct Employee* create_employee(int id, char* name, int salary) {
+    struct Employee* ptr = (struct Employee*) malloc(sizeof(struct Employee));
+    ptr->emp_id = id;
+    ptr->emp_salary = salary;
+    ptr->emp_name = strdup(name);
+    // strdup() creates a copy of the string or char pointer and stores it in the new char pointer of the employee
+    ptr->subordinate_1 = NULL;
+    ptr->subordinate_2 = NULL;
+    return ptr;
+}
+
+// The following code creates a organisation from scanning the input file
+struct Employee* create_company() {
+    int id, salary;
+    char name[100];
+    scanf("%d", &id);
+    if(id == -1) return NULL; // -1 is used when there is a NULL pointer ie when no value is present
+
+    scanf("%s %d", name, &salary);
+    struct Employee* par = create_employee(id, name, salary);
+
+    par->subordinate_1 = create_company();
+    par->subordinate_2 = create_company();
+
+    return par;
+}
+
+// The following function
+void print_company_helper(struct Employee* ceo) {
+    // take input
+    if(!ceo) {
+        printf("%d ", -1);
+        return;
+    }
+    printf("%d %s %d ", ceo->emp_id, ceo->emp_name, ceo->emp_salary);
+    print_company_helper(ceo->subordinate_1);
+    print_company_helper(ceo->subordinate_2);
+    return;
+}
+
+void print_company(struct Employee* ceo) {
+    print_company_helper(ceo);
+    printf("\n");
+    return;
+}
+
+// --------------------------------------------------- YOU CAN EDIT BELOW THIS LINE -----------------------------------
+
+struct Employee* CEO = NULL;
+// CEO is a global pointer that points to the CEO of the company
+
+// The below function returns the employee id of the first common boss
+struct Employee* findLCA(struct Employee* root,struct Employee* x, struct Employee* y)
+{
+    // base case 1: if the tree is empty
+    if (root == NULL) {
+        return NULL;
+    }
+
+    // base case 2: if either `x` or `y` is found
+    if (root == x || root == y) {
+        return root;
+    }
+
+    // recursively check if `x` or `y` exists in the left subtree
+    struct Employee* left = findLCA(root->subordinate_1, x, y);
+
+    // recursively check if `x` or `y` exists in the right subtree
+    struct Employee* right = findLCA(root->subordinate_2, x, y);
+
+    // if `x` is found in one subtree and `y` is found in the other subtree,
+    // update lca to the current node
+    if (left && right) {
+        return root;
+    }
+
+    // if `x` and `y` exist in the left subtree
+    if (left) {
+        return left;
+    }
+
+    // if `x` and `y` exist in the right subtree
+    if (right) {
+        return right;
+}
+}
+struct Employee* isNodePresent(struct Employee* root,int root2)
+{
+    // base case
+    if(root==NULL)
+    return NULL;
+
+    if (root != NULL) {
+    // if the node is found, return true
+    if (root->emp_id == root2) {
+        return root;
+    }
+
+    // return true if the node is found in the left or right subtree
+    struct Employee* left = isNodePresent(root->subordinate_1, root2);
+    struct Employee* right =isNodePresent(root->subordinate_2, root2);
+
+    if(left!=NULL)
+        return left;
+
+    return right;
+    }
+}
+// The below function returns the employee id of the first common boss
+int get_first_common_boss(int emp_id1,int emp_id2){
+    if (emp_id1==emp_id2)
+    {   int z=Boss(emp_id1);
+        return z;
+    }
+    struct Employee* cur=CEO;
+    struct Employee* pt1=isNodePresent(cur,emp_id1);
+    struct Employee* pt2=isNodePresent(cur,emp_id2);
+    struct Employee* p= findLCA(cur,pt1,pt2);
+    int x= p->emp_id;
+    return x;
+}
+void ESL(struct Employee* ptr, int lund,char* A)
+{
+    if (ptr==NULL) return;
+    if (lund==0) {
+        if (strcmp(A,ptr->emp_name)==0){
+            printf("%d ",ptr->emp_id);
+        }
+    }
+    else{
+        ESL(ptr->subordinate_1,lund-1,A);
+        ESL(ptr->subordinate_2,lund-1,A);
+    }
+}
+//Print the employees with the same last name sperated by a space in the order of their level
+void same_last_names(int emp_id)
+{
+    struct Employee* cur=CEO;
+    int hgt=height(cur);
+    struct Employee* temp= isNodePresent(cur,emp_id);
+    char* A= temp->emp_name;
+    for (int i=0;i<hgt;i++)
+    {
+        ESL(cur,i,A);
+    }
+}
+int height(struct Employee* head)
+{   if (head==NULL) return 0;
+    int x= height(head->subordinate_1);
+    int y=height(head->subordinate_2);
+    if (x>y)
+    {
+        return 1+x;
+    }
+    else{
+        return 1+y;
+    }
+}
+int BH(struct Employee* ptr,int emp_id)
+{   if (ptr==NULL) return -1;
+    if ((ptr->subordinate_1!=NULL && ptr->subordinate_1->emp_id==emp_id) || (ptr->subordinate_2!=NULL && ptr->subordinate_2->emp_id==emp_id)){
+        return ptr->emp_id;
+    }
+    int x=BH(ptr->subordinate_1,emp_id);
+    if (x!=-1) return x;
+    x=BH(ptr->subordinate_2,emp_id);
+    return x;
+
+    }
+int Boss(int emp_id) {
+    if (CEO->emp_id==emp_id) return -1;
+    else{
+        return BH(CEO,emp_id);
+    }
+}
+int Level(int emp_id) {
+    // Note that ceo has level 0
+       if (CEO->emp_id==emp_id) return 0;
+    struct Employee* temp=CEO;
+    LH(temp,emp_id,0);
+}
+int LH (struct Employee* ptr, int data,int lvl)
+{
+    if (ptr==NULL) return -1;
+    if (ptr->emp_id==data) return lvl;
+    int x=LH(ptr->subordinate_1,data,lvl+1);
+    if (x!=-1) return x;
+    x=LH(ptr->subordinate_2,data,lvl+1);
+    return x;
+}
+// Print the bosses of the given employee in the order from CEO to immediate boss
+void get_all_bosses(int emp_id)
+{   if (CEO->emp_id==emp_id){
+    printf("-1");
+    return;}
+    int n=Level(emp_id);
+    int A[n];
+    for (int i=0;i<n;i++)
+    {   int y=Boss(emp_id);
+        A[i]=y;
+        emp_id=y;
+    }
+    for (int j=1;j<n+1;j++)
+    {
+        int z=A[n-j];
+        printf("%d ",z);
+    }
+}
+int count=0;
+int sal=0;
+// Return the average salary of the team with the given employee as head
+double get_average_salary(int emp_id){
+    struct Employee* head= CEO;
+    struct Employee* ptr= isNodePresent(head,emp_id);
+    num_salary(ptr);
+    double copy2=sal;
+    clear_sal();
+    num_people(ptr);
+    int copy1=count;
+    clear_cunt();
+    double z= copy2/copy1 ;
+    return z;
+}
+void clear_cunt(){
+    count=0;}
+int num_people(struct Employee* ptr)
+{    if (ptr==NULL) return 0;
+    count++;
+    num_people(ptr->subordinate_1);
+    num_people(ptr->subordinate_2);
+}
+
+void clear_sal(){
+sal=0;}
+int num_salary(struct Employee* ptr)
+{
+    if (ptr==NULL) return;
+    sal+= ptr->emp_salary;
+    num_salary(ptr->subordinate_1);
+    num_salary(ptr->subordinate_2);
+}
+
+
+// --------------------------------------------------- YOU CAN EDIT ABOVE THIS LINE -----------------------------------
+
+/* The following driver code creates a organisation for you and based on the input file
+it will call all the functions that are necessary, your job is to edit the functions
+above the line. Their descriptions are in the pdf and in the comments in the code. */
+
+int main(int argc, char const *argv[])
+{
+    CEO = create_company();
+    print_company(CEO);
+
+    int T;
+    scanf("%d", &T);
+
+    char operation_type[100];
+
+    while(T--) {
+        scanf("%s", operation_type);
+
+        if(strcmp(operation_type, "get_first_common_boss") == 0) {
+            int x,y;
+            scanf("%d %d", &x, &y);
+            int ans = get_first_common_boss(x,y);
+            printf("%d\n", ans);
+        }
+        else if(strcmp(operation_type, "same_last_names") == 0) {
+            int x;
+            scanf("%d", &x);
+            same_last_names(x);
+            printf("\n");
+        }
+        else if(strcmp(operation_type, "get_all_bosses") == 0) {
+            int x;
+            scanf("%d", &x);
+            get_all_bosses(x);
+            printf("\n");
+        }
+        else if(strcmp(operation_type, "get_average_salary") == 0) {
+            int x;
+            scanf("%d", &x);
+            double ans = get_average_salary(x);
+            printf("%.2f\n", ans);
+        }
+
+    }
+
+    return 0;
+}
+
